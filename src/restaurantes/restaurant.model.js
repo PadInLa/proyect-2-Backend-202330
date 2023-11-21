@@ -4,6 +4,7 @@ const restaurantSchema = mongoose.Schema(
   {
     name: { type: String, required: [true] },
     address: { type: String, required: [true] },
+    idAdministrador: { type: ObjectId, required: [true]},
     category: {
       type: [String],
       validate: {

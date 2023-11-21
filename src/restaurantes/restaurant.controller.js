@@ -1,11 +1,27 @@
 import restaurantModel from "./restaurant.model";
 
+const llave = "padillachristian";
+
+
 export async function createRestaurant(req, res) {
   try {
     const product = req.body;
     req.body.isDisable = "false";
-    const document = await restaurantModel.create(product);
-    res.status(201).json(document);
+
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+    if(decoded.mode != "administrador de restaurante"){
+      res.status(401).json("No tiene permiso para crear restaurantes");   
+    }else{
+      product.idAdministrador = decoded.IdUsuario;
+      const document = await restaurantModel.create(product);
+      res.status(201).json(document);
+    }
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -44,14 +60,34 @@ export async function getRestaurants(req, res) {
 export async function UpdateRestaurant(req, res) {
   try {
     const id = req.params.id;
-    const document = await restaurantModel.findOneAndUpdate(
-      { _id: id, isDisable: false },
-      req.body,
-      {
-        runValidators: true,
-      }
-    );
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
+    const document1 = await restaurantModel.findOne({
+      _id: id,
+      isDisable: false,
+    });
+
+    if(document1.idAdministrador == decoded.IdUsuario){
+      const document = await restaurantModel.findOneAndUpdate(
+        { _id: id, isDisable: false },
+        req.body,
+        {
+          runValidators: true,
+        }
+      );
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{  
+      res.status(401).json("No tiene permiso para modificar restaurantes");
+    }
+    
+    
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -60,10 +96,29 @@ export async function UpdateRestaurant(req, res) {
 export async function DeleteRestaurant(req, res) {
   try {
     const id = req.params.id;
-    const document = await restaurantModel.findByIdAndUpdate(id, {
-      isDisable: true,
+
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
+    const document1 = await restaurantModel.findOne({
+      _id: id,
+      isDisable: false,
     });
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+
+    if(document1.idAdministrador == decoded.IdUsuario){
+      const document = await restaurantModel.findByIdAndUpdate(id, {
+        isDisable: true,
+      });
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{  
+      res.status(401).json("No tiene permiso para eliminar restaurantes");
+    }
+    
   } catch (err) {
     res.status(500).json(err.message);
   }

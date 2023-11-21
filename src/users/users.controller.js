@@ -1,9 +1,16 @@
 import Users from "./users.model";
+import argon2 from 'argon2';
+import jwt from 'jsonwebtoken';
+
+const llave = "padillachristian";
 
 export async function createUser(req, res) {
   try {
     const user = req.body;
+    const hashedPassword = await argon2.hash(user.password);
+    user.password = hashedPassword;
     req.body.isDisable = "false";
+
     const document = await Users.create(user);
     res.status(201).json(document);
   } catch (err) {
@@ -24,12 +31,13 @@ export async function getUserbyID(req, res) {
 export async function getUserbyName_pass(req, res) {
   try {
     const { email, pass } = req.params;
-    const response = await Users.findOne({
-      email: email,
-      password: pass,
-      isDisable: false,
-    });
-    response ? res.status(200).json(response) : res.sendStatus(404);
+    const usuario = await Users.findOne({email: email, isDisable: false});
+    if(usuario && await argon2.verify(usuario.password, pass)){
+      const token = jwt.sign({IdUsuario: usuario._id, mode: usuario.mode}, llave, {expiresIn: 86400});
+      response ? res.status(200).json(token) : res.sendStatus(404);
+    }
+    response ? res.status(404).json("Usuario no encontrado") : res.sendStatus(404);
+
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -37,9 +45,17 @@ export async function getUserbyName_pass(req, res) {
 
 export async function patchUser(req, res) {
   try {
-    const id = req.params.id;
+    //const id = req.params.id;
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
     const document = await Users.findOneAndUpdate(
-      { _id: id, isDisable: false },
+      { _id: decoded.IdUsuario, isDisable: false },
       req.body,
       { runValidators: true }
     );
@@ -51,8 +67,16 @@ export async function patchUser(req, res) {
 
 export async function deleteUser(req, res) {
   try {
-    const id = req.params.id;
-    const document = await Users.findByIdAndUpdate(id, { isDisable: true });
+    //const id = req.params.id;
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
+    const document = await Users.findByIdAndUpdate(decoded.IdUsuario, { isDisable: true });
     document ? res.status(200).json("changes applied") : res.sendStatus(404);
   } catch (err) {
     res.status(200).json(err.message);

@@ -1,11 +1,34 @@
 import productsModel from "./products.model";
+import restaurantModel from "./restaurantes/restaurant.model";
+
+const llave = "padillachristian";
+
 
 export async function createProduct(req, res) {
   try {
     const product = req.body;
     req.body.isDisable = "false";
-    const document = await productsModel.create(product);
-    res.status(201).json(document);
+
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
+    const document1 = await restaurantModel.findOne({
+      _id: product.restaurantID,
+      isDisable: false,
+    });
+
+    if(document1.idAdministrador == decoded.IdUsuario){
+      const document2 = await productsModel.create(product);
+      res.status(201).json(document2);
+    }else{  
+      res.status(401).json("No tiene permiso para crear productos");
+    }
+
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -42,12 +65,31 @@ export async function getproducts(req, res) {
 export async function UpdateProduct(req, res) {
   try {
     const id = req.params.id;
-    const document = await productsModel.findOneAndUpdate(
-      { _id: id, isDisable: false },
-      req.body,
-      { runValidators: true }
-    );
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
+    const document1 = await restaurantModel.findOne({
+      _id: id,
+      isDisable: false,
+    });
+
+    if(document1.idAdministrador == decoded.IdUsuario){
+      const document = await productsModel.findOneAndUpdate(
+        { _id: id, isDisable: false },
+        req.body,
+        { runValidators: true }
+      );
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{  
+      res.status(401).json("No tiene permiso para cambiar productos");
+    }
+
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -56,10 +98,29 @@ export async function UpdateProduct(req, res) {
 export async function DeleteProduct(req, res) {
   try {
     const id = req.params.id;
-    const document = await productsModel.findByIdAndUpdate(id, {
-      isDisable: true,
+    
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
+    const document1 = await restaurantModel.findOne({
+      _id: id,
+      isDisable: false,
     });
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+
+    if(document1.idAdministrador == decoded.IdUsuario){
+      const document = await productsModel.findByIdAndUpdate(id, {
+        isDisable: true,
+      });
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{  
+      res.status(401).json("No tiene permiso para eliminar productos");
+    }
+    
   } catch (err) {
     res.status(500).json(err.message);
   }

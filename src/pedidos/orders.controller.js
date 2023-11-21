@@ -1,9 +1,21 @@
 import ordersModel from "./orders.model";
 
+const llave = "padillachristian";
+
+
 export async function createOrder(req, res) {
   try {
     const product = req.body;
     req.body.isDisable = "false";
+
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+    product.userID = decoded.IdUsuario;
     const document = await ordersModel.create(product);
     res.status(201).json(document);
   } catch (err) {
@@ -63,8 +75,17 @@ export async function getOrderssended(req, res) {
 export async function UpdateOrder(req, res) {
   try {
     const id = req.params.id;
+
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+
     const document = await ordersModel.findOneAndUpdate(
-      { _id: id, isDisable: false, status: "Creado" },
+      { _id: id,userID:decoded.IdUsuario , isDisable: false, status: "Creado" },
       req.body,
       { runValidators: true }
     );
@@ -77,10 +98,25 @@ export async function UpdateOrder(req, res) {
 export async function DeleteOrder(req, res) {
   try {
     const id = req.params.id;
-    const document = await ordersModel.findByIdAndUpdate(id, {
-      isDisable: true,
-    });
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    const token = req.headers.authorization;
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      res.status(401).json("Token invalido");   
+    }
+    const value = await ordersModel.findOne({ _id: id});
+    if(value.userID == decoded.IdUsuario){
+      const document = await ordersModel.findByIdAndUpdate(id, {
+        isDisable: true,
+      });
+  
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{
+      res.status(401).json("No tiene permiso para eliminar pedidos");
+    }
+
+    
   } catch (err) {
     res.status(500).json(err.message);
   }
