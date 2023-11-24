@@ -36,8 +36,18 @@ export async function getUserbyName_pass(req, res) {
     const { email, pass } = req.params;
     const usuario = await Users.findOne({email: email, isDisable: false});
     if(usuario && await argon2.verify(usuario.password, pass)){
-      const token = jwt.sign({IdUsuario: usuario._id, mode: usuario.mode}, llave);
-      response ? res.status(200).json(token) : res.sendStatus(404);
+          if(usuario.mode == "administrador de restaurante"){
+            const otp = twofactor.generateToken(usuario.twofactorSecret);
+        console.log('Código OTP generado:', otp);
+
+        const isValid = twofactor.verifyToken(usuario.twofactorSecret, otp);
+        if (isValid) {
+          const token = jwt.sign({IdUsuario: usuario._id, mode: usuario.mode}, llave);
+          response ? res.status(200).json(token) : res.sendStatus(404);
+        }else{
+          res.status(200).json("Código OTP invalido");
+        }
+      }
     }
     response ? res.status(404).json("Usuario no encontrado") : res.sendStatus(404);
 
