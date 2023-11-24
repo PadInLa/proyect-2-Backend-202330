@@ -1,4 +1,5 @@
 import ordersModel from "./orders.model";
+import Users from "./users.model";
 
 const llave = "padillachristian";
 
@@ -16,8 +17,22 @@ export async function createOrder(req, res) {
       res.status(401).json("Token invalido");   
     }
     product.userID = decoded.IdUsuario;
-    const document = await ordersModel.create(product);
-    res.status(201).json(document);
+    
+    const user = await Users.findById(decoded.IdUsuario);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      const otp = twofactor.generateToken(user.twofactorSecret);
+      console.log('Código OTP generado:', otp);
+
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      if (isValid) {
+        const document = await ordersModel.create(product);
+        res.status(201).json(document);
+      }else{
+        res.status(200).json("Código OTP invalido");
+      }
+    
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -84,12 +99,25 @@ export async function UpdateOrder(req, res) {
       res.status(401).json("Token invalido");   
     }
 
-    const document = await ordersModel.findOneAndUpdate(
-      { _id: id,userID:decoded.IdUsuario , isDisable: false, status: "Creado" },
-      req.body,
-      { runValidators: true }
-    );
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    const user = await Users.findById(decoded.IdUsuario);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      const otp = twofactor.generateToken(user.twofactorSecret);
+      console.log('Código OTP generado:', otp);
+
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      if (isValid) {
+        const document = await ordersModel.findOneAndUpdate(
+          { _id: id,userID:decoded.IdUsuario , isDisable: false, status: "Creado" },
+          req.body,
+          { runValidators: true }
+        );
+        document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      }else{
+        res.status(200).json("Código OTP invalido");
+      }
+    
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -107,11 +135,24 @@ export async function DeleteOrder(req, res) {
     }
     const value = await ordersModel.findOne({ _id: id});
     if(value.userID == decoded.IdUsuario){
-      const document = await ordersModel.findByIdAndUpdate(id, {
-        isDisable: true,
-      });
-  
-      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      const user = await Users.findById(decoded.IdUsuario);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      const otp = twofactor.generateToken(user.twofactorSecret);
+      console.log('Código OTP generado:', otp);
+
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      if (isValid) {
+        const document = await ordersModel.findByIdAndUpdate(id, {
+          isDisable: true,
+        });
+    
+        document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      }else{
+        res.status(200).json("Código OTP invalido");
+      }
+
     }else{
       res.status(401).json("No tiene permiso para eliminar pedidos");
     }

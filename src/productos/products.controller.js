@@ -1,5 +1,6 @@
 import productsModel from "./products.model";
 import restaurantModel from "./restaurantes/restaurant.model";
+import Users from "./users.model";
 
 const llave = "padillachristian";
 
@@ -23,12 +24,23 @@ export async function createProduct(req, res) {
     });
 
     if(document1.idAdministrador == decoded.IdUsuario){
-      const document2 = await productsModel.create(product);
-      res.status(201).json(document2);
+      const user = await Users.findById(decoded.IdUsuario);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      const otp = twofactor.generateToken(user.twofactorSecret);
+      console.log('Código OTP generado:', otp);
+
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      if (isValid) {
+        const document2 = await productsModel.create(product);
+        res.status(201).json(document2);
+      }else{
+        res.status(200).json("Código OTP invalido");
+      }
     }else{  
       res.status(401).json("No tiene permiso para crear productos");
     }
-
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -80,12 +92,24 @@ export async function UpdateProduct(req, res) {
     });
 
     if(document1.idAdministrador == decoded.IdUsuario){
-      const document = await productsModel.findOneAndUpdate(
-        { _id: id, isDisable: false },
-        req.body,
-        { runValidators: true }
-      );
-      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      const user = await Users.findById(decoded.IdUsuario);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      const otp = twofactor.generateToken(user.twofactorSecret);
+      console.log('Código OTP generado:', otp);
+
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      if (isValid) {
+        const document = await productsModel.findOneAndUpdate(
+          { _id: id, isDisable: false },
+          req.body,
+          { runValidators: true }
+        );
+        document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      }else{
+        res.status(200).json("Código OTP invalido");
+      }
     }else{  
       res.status(401).json("No tiene permiso para cambiar productos");
     }
@@ -113,10 +137,22 @@ export async function DeleteProduct(req, res) {
     });
 
     if(document1.idAdministrador == decoded.IdUsuario){
-      const document = await productsModel.findByIdAndUpdate(id, {
-        isDisable: true,
-      });
-      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      const user = await Users.findById(decoded.IdUsuario);
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+      const otp = twofactor.generateToken(user.twofactorSecret);
+      console.log('Código OTP generado:', otp);
+
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      if (isValid) {
+        const document = await productsModel.findByIdAndUpdate(id, {
+          isDisable: true,
+        });
+        document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      }else{
+        res.status(200).json("Código OTP invalido");
+      }
     }else{  
       res.status(401).json("No tiene permiso para eliminar productos");
     }

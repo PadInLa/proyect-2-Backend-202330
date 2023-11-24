@@ -7,6 +7,7 @@ const userSchema = mongoose.Schema(
     email: { type: String, required: [true], unique: [true] },
     address: { type: String, required: [true] },
     phone: { type: String, required: [true], unique: [true] },
+    twofactorSecret: { type: String },
     mode: {
       type: String,
       required: [true],

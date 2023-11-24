@@ -3,12 +3,15 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
 const llave = "padillachristian";
+const twofactor = require("node-2fa");
 
 export async function createUser(req, res) {
   try {
     const user = req.body;
     const hashedPassword = await argon2.hash(user.password);
     user.password = hashedPassword;
+    const { secret } = twofactor.generateSecret();
+    user.twofactorSecret = secret;
     req.body.isDisable = "false";
 
     const document = await Users.create(user);
@@ -33,7 +36,7 @@ export async function getUserbyName_pass(req, res) {
     const { email, pass } = req.params;
     const usuario = await Users.findOne({email: email, isDisable: false});
     if(usuario && await argon2.verify(usuario.password, pass)){
-      const token = jwt.sign({IdUsuario: usuario._id, mode: usuario.mode}, llave, {expiresIn: 86400});
+      const token = jwt.sign({IdUsuario: usuario._id, mode: usuario.mode}, llave);
       response ? res.status(200).json(token) : res.sendStatus(404);
     }
     response ? res.status(404).json("Usuario no encontrado") : res.sendStatus(404);
@@ -54,12 +57,27 @@ export async function patchUser(req, res) {
       res.status(401).json("Token invalido");   
     }
 
-    const document = await Users.findOneAndUpdate(
-      { _id: decoded.IdUsuario, isDisable: false },
-      req.body,
-      { runValidators: true }
-    );
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    const user = await Users.findById(decoded.IdUsuario);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    const otp = twofactor.generateToken(user.twofactorSecret);
+    console.log('Código OTP generado:', otp);
+
+    const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+    if (isValid) {
+      const document = await Users.findOneAndUpdate(
+        { _id: decoded.IdUsuario, isDisable: false },
+        req.body,
+        { runValidators: true }
+      );
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{
+      res.status(200).json("Código OTP invalido");
+    }
+
+    
   } catch (err) {
     res.status(200).json(err.message);
   }
@@ -75,9 +93,21 @@ export async function deleteUser(req, res) {
     } catch (err) {
       res.status(401).json("Token invalido");   
     }
+    
+    const user = await Users.findById(decoded.IdUsuario);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    const otp = twofactor.generateToken(user.twofactorSecret);
+    console.log('Código OTP generado:', otp);
 
-    const document = await Users.findByIdAndUpdate(decoded.IdUsuario, { isDisable: true });
-    document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+    if (isValid) {
+      const document = await Users.findByIdAndUpdate(decoded.IdUsuario, { isDisable: true });
+      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+    }else{
+      res.status(200).json("Código OTP invalido");
+    }
   } catch (err) {
     res.status(200).json(err.message);
   }
