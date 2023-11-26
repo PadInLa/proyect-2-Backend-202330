@@ -21,3 +21,5 @@ pedidos
 7.	Por motivos de seguridad, el uso de Two-Factor Authentication es requerido para los administradores.
 a.	Implemente la funcionalidad de Two-Factor Authentication.
 
+Los test a la final no se logro que funcionaran todos pero los requisitos funcionales estan implementados y verificados.
+
