@@ -104,14 +104,14 @@ describe("User Endpoints", () => {
     test("Successfully deletes a user", async () => {
       // Obtain a valid token first
       const response = await supertest(app)
-        .delete(`/users/someUserId`)
+        .delete(`/users/`)
         .set("Authorization", ` ${token}`);
       expect(response.status).toBe(200);
     });
 
     test("Fails to delete a user with invalid token", async () => {
       const response = await supertest(app)
-        .delete(`/users/someUserId`)
+        .delete(`/users/`)
         .set("Authorization", token);
       expect(response.status).toBe(401);
     });
