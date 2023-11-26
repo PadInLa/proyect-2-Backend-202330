@@ -22,6 +22,6 @@ pedidos
 a.	Implemente la funcionalidad de Two-Factor Authentication.
 
 Los test a la final no se logro que todos funcionaran todos pero los requisitos funcionales estan implementados y verificados.
-Test funcionales:
-a. Users
+
+Test funcionales: Users
 
