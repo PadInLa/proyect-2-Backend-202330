@@ -10,11 +10,14 @@ export async function createUser(req, res) {
     const user = req.body;
     const hashedPassword = await argon2.hash(user.password);
     user.password = hashedPassword;
-    const { secret } = twofactor.generateSecret();
+    const secret = twofactor.generateSecret();
+    console.log("Código OTP generado:", secret);
     user.twofactorSecret = secret;
     req.body.isDisable = "false";
+    console.log(user);
 
     const document = await Users.create(user);
+    console.log("docc ",document);
     res.status(201).json(document);
   } catch (err) {
     res.status(500).json(err.message);
@@ -41,8 +44,10 @@ export async function getUserbyName_pass(req, res) {
     if (usuario && (await argon2.verify(usuario.password, pass))) {
       if (usuario.mode == "administrador de restaurante") {
         const otp = twofactor.generateToken(usuario.twofactorSecret);
+        console.log("Código OTP generado:", otp);
 
         const isValid = twofactor.verifyToken(usuario.twofactorSecret, otp.token);
+        console.log("isValid ",isValid);
 
         if (isValid && isValid.delta === 0) {
           const token = jwt.sign(

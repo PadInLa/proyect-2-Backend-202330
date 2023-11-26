@@ -1,5 +1,12 @@
 import supertest from "supertest";
 import app from "../../app.js";
+import twofactor from "node-2fa";
+
+
+jest.mock("node-2fa", () => ({
+  generateSecret: jest.fn(() => ("ahoraganoyo")),
+}));
+
 
 describe("User Endpoints", () => {
   let token;
@@ -36,8 +43,8 @@ describe("User Endpoints", () => {
   // GET - Retrieve User by getUserbyName_pass
   describe("Retrieve User by Name_pass", () => {
     test("Successfully retrieves a user", async () => {
-      const email = "Chris@example.com"; 
-      const pass = "123456";     
+      const email = "Padinla@example.com"; 
+      const pass = "1234321";     
       const response = await supertest(app).get(`/users/${email}/${pass}`);
       token = response.body.token;
       console.log("hay dios mio ",token);
