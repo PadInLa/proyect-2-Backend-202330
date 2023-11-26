@@ -38,7 +38,6 @@ export async function getUserbyName_pass(req, res) {
     const opciones = {
       expiresIn: '100000000000h', // Establece la expiración a 1 hora
     };
-    console.log(await argon2.verify(usuario.password, pass));
     if (usuario && (await argon2.verify(usuario.password, pass))) {
       if (usuario.mode == "administrador de restaurante") {
         const otp = twofactor.generateToken(usuario.twofactorSecret);

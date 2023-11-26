@@ -9,9 +9,9 @@ const app = express();
 mongoose
   .connect(
     'mongodb+srv://' +
-      process.env.MONGO_USER +
+      "cdmanga" +
       ':' +
-      process.env.MONGO_PASS +
+      "Christian123" +
       '@proyecto1.szw21vh.mongodb.net',
     {
       useNewUrlParser: true,
@@ -43,3 +43,5 @@ app.use("/orders", ordersrouter);
 
 // Inicia app en puerto 8080
 app.listen(8080);
+
+export default app;

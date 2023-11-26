@@ -10,7 +10,7 @@ describe("User Endpoints", () => {
       const userData = {
         name: "Padinla",
         password: "1234321",
-        email: "pedro@example.com",
+        email: "Padinla@example.com",
         address: "123 Main St",
         phone: "555-12345689",
         mode:"administrador de restaurante"
@@ -36,10 +36,11 @@ describe("User Endpoints", () => {
   // GET - Retrieve User by getUserbyName_pass
   describe("Retrieve User by Name_pass", () => {
     test("Successfully retrieves a user", async () => {
-      const name = "Padinla"; 
-      const password = "1234321";     
-      const response = await supertest(app).get(`/users/${name}/${password}`);
+      const email = "Chris@example.com"; 
+      const pass = "123456";     
+      const response = await supertest(app).get(`/users/${email}/${pass}`);
       token = response.body.token;
+      console.log("hay dios mio ",token);
       expect(response.status).toBe(200);
     });
   });
