@@ -26,7 +26,7 @@ export async function createUser(req, res) {
 
 export async function getUserbyID(req, res) {
   try {
-    const filter = req.params.number;
+    const id = req.params.number;
     const value = await Users.findOne({ _id: id, isDisable: false });
     value ? res.status(200).json(value) : res.sendStatus(404);
   } catch (err) {

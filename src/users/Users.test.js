@@ -6,7 +6,10 @@ import twofactor from "node-2fa";
 jest.mock("node-2fa", () => ({
   generateSecret: jest.fn(() => ("ahoraganoyo")),
 }));
-
+jest.mock('node-2fa', () => ({
+  generateToken: jest.fn(() => ({ token: 'ahoraganoyo' })),
+  verifyToken: jest.fn(() => ({ delta: 0 })),
+}));
 
 describe("User Endpoints", () => {
   let token;
@@ -55,13 +58,13 @@ describe("User Endpoints", () => {
   // GET - Retrieve User by ID
   describe("Retrieve User by ID", () => {
     test("Successfully retrieves a user", async () => {
-      const userId = "someUserId"; // Replace with a valid user ID
+      const userId = "656364b4213773deca7b04cf"; // Replace with a valid user ID
       const response = await supertest(app).get(`/users/${userId}`);
       expect(response.status).toBe(200);
     });
 
     test("Fails to retrieve a non-existent user", async () => {
-      const nonExistentUserId = "nonExistentUserId";
+      const nonExistentUserId = "656364b4213773deca7b04aa";
       const response = await supertest(app).get(`/users/${nonExistentUserId}`);
       expect(response.status).toBe(404);
     });
@@ -73,13 +76,13 @@ describe("User Endpoints", () => {
     test("Successfully updates a user", async () => {
       // Obtain a valid token first
       const updateData = {
-        address: "Updated Address",
+        address: "calle 52",
       };
 
       const response = await supertest(app)
-        .patch(`/users/someUserId`)
+        .patch(`/users/`)
         .send(updateData)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Authorization", `${token}`);
       expect(response.status).toBe(200);
     });
 
@@ -89,7 +92,7 @@ describe("User Endpoints", () => {
       };
 
       const response = await supertest(app)
-        .patch(`/users/someUserId`)
+        .patch(`/users/`)
         .send(updateData)
         .set("Authorization", token);
       expect(response.status).toBe(401);
@@ -102,7 +105,7 @@ describe("User Endpoints", () => {
       // Obtain a valid token first
       const response = await supertest(app)
         .delete(`/users/someUserId`)
-        .set("Authorization", `Bearer ${token}`);
+        .set("Authorization", ` ${token}`);
       expect(response.status).toBe(200);
     });
 
