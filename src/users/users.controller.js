@@ -107,7 +107,7 @@ export async function patchUser(req, res) {
       res.status(200).json("Código OTP invalido");
     }
   } catch (err) {
-    res.status(200).json(err.message);
+    res.status(500).json(err.message);
   }
 }
 

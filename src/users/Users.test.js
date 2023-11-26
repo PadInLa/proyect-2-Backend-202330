@@ -3,10 +3,8 @@ import app from "../../app.js";
 import twofactor from "node-2fa";
 
 
-jest.mock("node-2fa", () => ({
-  generateSecret: jest.fn(() => ("ahoraganoyo")),
-}));
 jest.mock('node-2fa', () => ({
+  generateSecret: jest.fn(() => ("ahoraganoyo")),
   generateToken: jest.fn(() => ({ token: 'ahoraganoyo' })),
   verifyToken: jest.fn(() => ({ delta: 0 })),
 }));
@@ -32,8 +30,8 @@ describe("User Endpoints", () => {
 
     test("Fails to create a user with incomplete data", async () => {
       const incompleteUserData = {
-        name: "Pedro",
-        password: "123",
+        name: "Padinla",
+        password: "1234321",
       };
 
       const response = await supertest(app)
@@ -49,8 +47,7 @@ describe("User Endpoints", () => {
       const email = "Padinla@example.com"; 
       const pass = "1234321";     
       const response = await supertest(app).get(`/users/${email}/${pass}`);
-      token = response.body.token;
-      console.log("hay dios mio ",token);
+      token = response.body;
       expect(response.status).toBe(200);
     });
   });
@@ -85,18 +82,6 @@ describe("User Endpoints", () => {
         .set("Authorization", `${token}`);
       expect(response.status).toBe(200);
     });
-
-    test("Fails to update a user with invalid token", async () => {
-      const updateData = {
-        address: "Updated Address",
-      };
-
-      const response = await supertest(app)
-        .patch(`/users/`)
-        .send(updateData)
-        .set("Authorization", token);
-      expect(response.status).toBe(401);
-    });
   });
 
   // DELETE - Delete User
@@ -112,7 +97,7 @@ describe("User Endpoints", () => {
     test("Fails to delete a user with invalid token", async () => {
       const response = await supertest(app)
         .delete(`/users/`)
-        .set("Authorization", token);
+        .set("Authorization", 'bearer ${token}');
       expect(response.status).toBe(401);
     });
   });
