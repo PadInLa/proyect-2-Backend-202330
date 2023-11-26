@@ -25,7 +25,7 @@ export async function createRestaurant(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         product.idAdministrador = decoded.IdUsuario;
         const document = await restaurantModel.create(product);
@@ -94,7 +94,7 @@ export async function UpdateRestaurant(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         const document = await restaurantModel.findOneAndUpdate(
           { _id: id, isDisable: false },
@@ -142,7 +142,7 @@ export async function DeleteRestaurant(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         const document = await restaurantModel.findByIdAndUpdate(id, {
           isDisable: true,

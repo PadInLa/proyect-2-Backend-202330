@@ -13,6 +13,7 @@ describe("User Endpoints", () => {
         email: "pedro@example.com",
         address: "123 Main St",
         phone: "555-1234",
+        mode:"cliente"
       };
 
       const response = await supertest(app).post("/users/").send(userData);

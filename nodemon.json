@@ -1,0 +1,6 @@
+{
+  "env": {
+    "MONGO_USER": "cdmanga",
+    "MONGO_PASS": "Christian123"
+  }
+}

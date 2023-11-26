@@ -30,7 +30,7 @@ export async function createProduct(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         const document2 = await productsModel.create(product);
         res.status(201).json(document2);
@@ -98,7 +98,7 @@ export async function UpdateProduct(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         const document = await productsModel.findOneAndUpdate(
           { _id: id, isDisable: false },
@@ -144,7 +144,7 @@ export async function DeleteProduct(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         const document = await productsModel.findByIdAndUpdate(id, {
           isDisable: true,

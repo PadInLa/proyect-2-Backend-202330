@@ -35,30 +35,37 @@ export async function getUserbyName_pass(req, res) {
   try {
     const { email, pass } = req.params;
     const usuario = await Users.findOne({ email: email, isDisable: false });
+    console.log(await argon2.verify(usuario.password, pass));
     if (usuario && (await argon2.verify(usuario.password, pass))) {
       if (usuario.mode == "administrador de restaurante") {
         const otp = twofactor.generateToken(usuario.twofactorSecret);
-        console.log("Código OTP generado:", otp);
 
-        const isValid = twofactor.verifyToken(usuario.twofactorSecret, otp);
-        if (isValid) {
+        const isValid = twofactor.verifyToken(usuario.twofactorSecret, otp.token);
+
+        if (isValid && isValid.delta === 0) {
           const token = jwt.sign(
             { IdUsuario: usuario._id, mode: usuario.mode },
             llave
           );
-          response ? res.status(200).json(token) : res.sendStatus(404);
+          return res.status(200).json(token); // Añade 'return' aquí
         } else {
-          res.status(200).json("Código OTP invalido");
-        }
+          return res.status(200).json("Código OTP inválido");
+        }        
+        
+      }else{
+        const token = jwt.sign(
+          { IdUsuario: usuario._id, mode: usuario.mode },
+          llave
+        );
+        res.status(200).json(token); 
       }
     }
-    response
-      ? res.status(404).json("Usuario no encontrado")
-      : res.sendStatus(404);
+    res.status(404).json("Usuario no encontrado"); 
   } catch (err) {
     res.status(500).json(err.message);
   }
 }
+
 
 export async function patchUser(req, res) {
   try {
@@ -79,7 +86,7 @@ export async function patchUser(req, res) {
     const otp = twofactor.generateToken(user.twofactorSecret);
     console.log("Código OTP generado:", otp);
 
-    const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+    const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
     if (isValid) {
       const document = await Users.findOneAndUpdate(
         { _id: decoded.IdUsuario, isDisable: false },
@@ -97,7 +104,7 @@ export async function patchUser(req, res) {
 
 export async function deleteUser(req, res) {
   try {
-    //const id = req.params.id;
+    const id = req.params.id;
     const token = req.headers.authorization;
     let decoded;
     try {
@@ -113,7 +120,7 @@ export async function deleteUser(req, res) {
     const otp = twofactor.generateToken(user.twofactorSecret);
     console.log("Código OTP generado:", otp);
 
-    const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+    const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
     if (isValid) {
       const document = await Users.findByIdAndUpdate(decoded.IdUsuario, {
         isDisable: true,

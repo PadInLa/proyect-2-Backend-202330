@@ -24,7 +24,7 @@ export async function createOrder(req, res) {
     const otp = twofactor.generateToken(user.twofactorSecret);
     console.log("Código OTP generado:", otp);
 
-    const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+    const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
     if (isValid) {
       const document = await ordersModel.create(product);
       res.status(201).json(document);
@@ -107,7 +107,7 @@ export async function UpdateOrder(req, res) {
     const otp = twofactor.generateToken(user.twofactorSecret);
     console.log("Código OTP generado:", otp);
 
-    const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+    const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
     if (isValid) {
       const document = await ordersModel.findOneAndUpdate(
         {
@@ -147,7 +147,7 @@ export async function DeleteOrder(req, res) {
       const otp = twofactor.generateToken(user.twofactorSecret);
       console.log("Código OTP generado:", otp);
 
-      const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
+      const isValid = twofactor.verifyToken(user.twofactorSecret, otp.token);
       if (isValid) {
         const document = await ordersModel.findByIdAndUpdate(id, {
           isDisable: true,
