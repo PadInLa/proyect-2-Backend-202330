@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema(
   {
@@ -12,7 +12,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true],
       default: "cliente",
-      enum: ["cliente","administrador de restaurante","domiciliario"]
+      enum: ["cliente", "administrador de restaurante", "domiciliario"],
     },
     isDisable: { type: Boolean, default: false },
   },

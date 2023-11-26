@@ -4,7 +4,7 @@ import {
   getUserbyID,
   getUserbyName_pass,
   patchUser,
-} from "./users.controller";
+} from "./users.controller.js";
 import { Router } from "express";
 const router = Router();
 

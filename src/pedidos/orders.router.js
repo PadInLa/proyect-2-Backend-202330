@@ -6,7 +6,7 @@ import {
   getOrder,
   getOrders,
   getOrderssended,
-} from "./orders.controller";
+} from "./orders.controller.js";
 
 const router = Router();
 // Endpoint GET

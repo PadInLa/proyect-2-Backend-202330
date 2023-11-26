@@ -4,7 +4,7 @@ import {
   createProduct,
   getProduct,
   getproducts,
-} from "./products.controller";
+} from "./products.controller.js";
 import { Router } from "express";
 const router = Router();
 

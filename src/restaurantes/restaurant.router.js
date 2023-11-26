@@ -4,7 +4,7 @@ import {
   createRestaurant,
   getRestaurant,
   getRestaurants,
-} from "./restaurant.controller";
+} from "./restaurant.controller.js";
 import { Router } from "express";
 const router = Router();
 

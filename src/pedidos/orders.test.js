@@ -1,11 +1,18 @@
 import supertest from "supertest";
-import app from "../../app.js";
+import app from "../../index";
 
 describe("Order Endpoints", () => {
   let token;
   // Assuming token generation logic remains similar
   beforeAll(async () => {
-    // Logic to obtain a valid token for authenticated requests
+    const loginResponse = await supertest(app)
+      .post("/users/login") // Adjust this endpoint according to your actual login endpoint
+      .send({
+        email: "user@example.com", // Use a valid email
+        password: "password", // Use a valid password
+      });
+
+    token = loginResponse.body.token;
   });
 
   describe("Order Creation", () => {

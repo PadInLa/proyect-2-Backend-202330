@@ -1,9 +1,8 @@
-import productsModel from "./products.model";
-import restaurantModel from "./restaurantes/restaurant.model";
-import Users from "./users.model";
+import productsModel from "./products.model.js";
+import restaurantModel from "../restaurantes/restaurant.model.js";
+import Users from "../users/users.model.js";
 
 const llave = "padillachristian";
-
 
 export async function createProduct(req, res) {
   try {
@@ -15,7 +14,7 @@ export async function createProduct(req, res) {
     try {
       decoded = jwt.verify(token, llave);
     } catch (err) {
-      res.status(401).json("Token invalido");   
+      res.status(401).json("Token invalido");
     }
 
     const document1 = await restaurantModel.findOne({
@@ -23,22 +22,22 @@ export async function createProduct(req, res) {
       isDisable: false,
     });
 
-    if(document1.idAdministrador == decoded.IdUsuario){
+    if (document1.idAdministrador == decoded.IdUsuario) {
       const user = await Users.findById(decoded.IdUsuario);
       if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
       const otp = twofactor.generateToken(user.twofactorSecret);
-      console.log('Código OTP generado:', otp);
+      console.log("Código OTP generado:", otp);
 
       const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
       if (isValid) {
         const document2 = await productsModel.create(product);
         res.status(201).json(document2);
-      }else{
+      } else {
         res.status(200).json("Código OTP invalido");
       }
-    }else{  
+    } else {
       res.status(401).json("No tiene permiso para crear productos");
     }
   } catch (err) {
@@ -65,7 +64,7 @@ export async function getproducts(req, res) {
       query.restaurant = restID;
     }
     if (cat) {
-      query.category = {$in: cat.split(",")};
+      query.category = { $in: cat.split(",") };
     }
     const document = await productsModel.find(query);
     document.length > 0 ? res.status(200).json(document) : res.sendStatus(404);
@@ -77,13 +76,13 @@ export async function getproducts(req, res) {
 export async function UpdateProduct(req, res) {
   try {
     const id = req.params.id;
-    
+
     const token = req.headers.authorization;
     let decoded;
     try {
       decoded = jwt.verify(token, llave);
     } catch (err) {
-      res.status(401).json("Token invalido");   
+      res.status(401).json("Token invalido");
     }
 
     const document1 = await restaurantModel.findOne({
@@ -91,13 +90,13 @@ export async function UpdateProduct(req, res) {
       isDisable: false,
     });
 
-    if(document1.idAdministrador == decoded.IdUsuario){
+    if (document1.idAdministrador == decoded.IdUsuario) {
       const user = await Users.findById(decoded.IdUsuario);
       if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
       const otp = twofactor.generateToken(user.twofactorSecret);
-      console.log('Código OTP generado:', otp);
+      console.log("Código OTP generado:", otp);
 
       const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
       if (isValid) {
@@ -106,14 +105,15 @@ export async function UpdateProduct(req, res) {
           req.body,
           { runValidators: true }
         );
-        document ? res.status(200).json("changes applied") : res.sendStatus(404);
-      }else{
+        document
+          ? res.status(200).json("changes applied")
+          : res.sendStatus(404);
+      } else {
         res.status(200).json("Código OTP invalido");
       }
-    }else{  
+    } else {
       res.status(401).json("No tiene permiso para cambiar productos");
     }
-
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -122,13 +122,13 @@ export async function UpdateProduct(req, res) {
 export async function DeleteProduct(req, res) {
   try {
     const id = req.params.id;
-    
+
     const token = req.headers.authorization;
     let decoded;
     try {
       decoded = jwt.verify(token, llave);
     } catch (err) {
-      res.status(401).json("Token invalido");   
+      res.status(401).json("Token invalido");
     }
 
     const document1 = await restaurantModel.findOne({
@@ -136,27 +136,28 @@ export async function DeleteProduct(req, res) {
       isDisable: false,
     });
 
-    if(document1.idAdministrador == decoded.IdUsuario){
+    if (document1.idAdministrador == decoded.IdUsuario) {
       const user = await Users.findById(decoded.IdUsuario);
       if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
       const otp = twofactor.generateToken(user.twofactorSecret);
-      console.log('Código OTP generado:', otp);
+      console.log("Código OTP generado:", otp);
 
       const isValid = twofactor.verifyToken(user.twofactorSecret, otp);
       if (isValid) {
         const document = await productsModel.findByIdAndUpdate(id, {
           isDisable: true,
         });
-        document ? res.status(200).json("changes applied") : res.sendStatus(404);
-      }else{
+        document
+          ? res.status(200).json("changes applied")
+          : res.sendStatus(404);
+      } else {
         res.status(200).json("Código OTP invalido");
       }
-    }else{  
+    } else {
       res.status(401).json("No tiene permiso para eliminar productos");
     }
-    
   } catch (err) {
     res.status(500).json(err.message);
   }
