@@ -35,6 +35,9 @@ export async function getUserbyName_pass(req, res) {
   try {
     const { email, pass } = req.params;
     const usuario = await Users.findOne({ email: email, isDisable: false });
+    const opciones = {
+      expiresIn: '100000000000h', // Establece la expiración a 1 hora
+    };
     console.log(await argon2.verify(usuario.password, pass));
     if (usuario && (await argon2.verify(usuario.password, pass))) {
       if (usuario.mode == "administrador de restaurante") {
@@ -45,7 +48,7 @@ export async function getUserbyName_pass(req, res) {
         if (isValid && isValid.delta === 0) {
           const token = jwt.sign(
             { IdUsuario: usuario._id, mode: usuario.mode },
-            llave
+            llave,opciones
           );
           return res.status(200).json(token); // Añade 'return' aquí
         } else {
@@ -53,9 +56,10 @@ export async function getUserbyName_pass(req, res) {
         }        
         
       }else{
+        
         const token = jwt.sign(
           { IdUsuario: usuario._id, mode: usuario.mode },
-          llave
+          llave,opciones
         );
         res.status(200).json(token); 
       }
@@ -71,6 +75,7 @@ export async function patchUser(req, res) {
   try {
     //const id = req.params.id;
     const token = req.headers.authorization;
+    console.log(token);
     let decoded;
     try {
       decoded = jwt.verify(token, llave);
@@ -104,13 +109,15 @@ export async function patchUser(req, res) {
 
 export async function deleteUser(req, res) {
   try {
-    const id = req.params.id;
+    //const id = req.params.id;
     const token = req.headers.authorization;
+    console.log(token);
     let decoded;
     try {
       decoded = jwt.verify(token, llave);
+      console.log(decoded);
     } catch (err) {
-      res.status(401).json("Token invalido");
+      return res.status(401).json("Token invalido"); 
     }
 
     const user = await Users.findById(decoded.IdUsuario);
@@ -125,11 +132,11 @@ export async function deleteUser(req, res) {
       const document = await Users.findByIdAndUpdate(decoded.IdUsuario, {
         isDisable: true,
       });
-      document ? res.status(200).json("changes applied") : res.sendStatus(404);
+      return document ? res.status(200).json("changes applied") : res.sendStatus(404); 
     } else {
-      res.status(200).json("Código OTP invalido");
+      return res.status(200).json("Código OTP invalido"); 
     }
   } catch (err) {
-    res.status(200).json(err.message);
+    return res.status(500).json(err.message); 
   }
 }

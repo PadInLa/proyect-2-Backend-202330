@@ -16,9 +16,9 @@ router.get("/:email/:pass", getUserbyName_pass);
 router.post("/", createUser);
 
 // Endpoint PATCH
-router.patch("/:id", patchUser);
+router.patch("/", patchUser);
 
 // Endpoint DELETE
-router.delete("/:id", deleteUser);
+router.delete("/", deleteUser);
 
 export default router;

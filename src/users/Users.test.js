@@ -8,12 +8,12 @@ describe("User Endpoints", () => {
   describe("Create User", () => {
     test("Successfully creates a user", async () => {
       const userData = {
-        name: "Pedro",
-        password: "aa1234",
+        name: "Padinla",
+        password: "1234321",
         email: "pedro@example.com",
         address: "123 Main St",
-        phone: "555-1234",
-        mode:"cliente"
+        phone: "555-12345689",
+        mode:"administrador de restaurante"
       };
 
       const response = await supertest(app).post("/users/").send(userData);
@@ -33,6 +33,17 @@ describe("User Endpoints", () => {
     });
   });
 
+  // GET - Retrieve User by getUserbyName_pass
+  describe("Retrieve User by Name_pass", () => {
+    test("Successfully retrieves a user", async () => {
+      const name = "Padinla"; 
+      const password = "1234321";     
+      const response = await supertest(app).get(`/users/${name}/${password}`);
+      token = response.body.token;
+      expect(response.status).toBe(200);
+    });
+  });
+
   // GET - Retrieve User by ID
   describe("Retrieve User by ID", () => {
     test("Successfully retrieves a user", async () => {
@@ -47,6 +58,7 @@ describe("User Endpoints", () => {
       expect(response.status).toBe(404);
     });
   });
+
 
   // PATCH - Update User
   describe("Update User", () => {
@@ -71,7 +83,7 @@ describe("User Endpoints", () => {
       const response = await supertest(app)
         .patch(`/users/someUserId`)
         .send(updateData)
-        .set("Authorization", "Bearer invalidToken");
+        .set("Authorization", token);
       expect(response.status).toBe(401);
     });
   });
@@ -89,7 +101,7 @@ describe("User Endpoints", () => {
     test("Fails to delete a user with invalid token", async () => {
       const response = await supertest(app)
         .delete(`/users/someUserId`)
-        .set("Authorization", "Bearer invalidToken");
+        .set("Authorization", token);
       expect(response.status).toBe(401);
     });
   });
