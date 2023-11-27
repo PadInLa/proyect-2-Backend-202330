@@ -26,11 +26,19 @@ export async function createUser(req, res) {
 
 export async function getUserbyID(req, res) {
   try {
-    const id = req.params.number;
-    const value = await Users.findOne({ _id: id, isDisable: false });
+    //const id = req.params.number;
+    const token = req.headers.authorization;
+    console.log(token);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, llave);
+    } catch (err) {
+      return res.status(404).json("Token invalido");
+    }
+    const value = await Users.findOne({ _id: decoded.IdUsuario, isDisable: false });
     value ? res.status(200).json(value) : res.sendStatus(404);
   } catch (err) {
-    res.status(500).json(err.message);
+    return res.status(500).json(err.message);
   }
 }
 

@@ -55,14 +55,14 @@ describe("User Endpoints", () => {
   // GET - Retrieve User by ID
   describe("Retrieve User by ID", () => {
     test("Successfully retrieves a user", async () => {
-      const userId = "656364b4213773deca7b04cf"; // Replace with a valid user ID
-      const response = await supertest(app).get(`/users/${userId}`);
+      //const userId = "656364b4213773deca7b04cf"; // Replace with a valid user ID
+      const response = await supertest(app).get(`/users/`).set("Authorization", `${token}`);
       expect(response.status).toBe(200);
     });
 
     test("Fails to retrieve a non-existent user", async () => {
-      const nonExistentUserId = "656364b4213773deca7b04aa";
-      const response = await supertest(app).get(`/users/${nonExistentUserId}`);
+      //const nonExistentUserId = "656364b4213773deca7b04aa";
+      const response = await supertest(app).get(`/users/`).set("Authorization", 'bearer ${token}');
       expect(response.status).toBe(404);
     });
   });

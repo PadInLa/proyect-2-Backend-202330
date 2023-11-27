@@ -9,7 +9,7 @@ import { Router } from "express";
 const router = Router();
 
 // Endpoint GET
-router.get("/:number", getUserbyID);
+router.get("/", getUserbyID);
 router.get("/:email/:pass", getUserbyName_pass);
 
 // Endpoint POST
